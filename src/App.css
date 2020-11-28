@@ -71,8 +71,8 @@
 }
 .action-table {
   display: none;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-around;
 }
 .action-update, .action-delete {
   border: 0;
@@ -81,15 +81,21 @@
   background-color: transparent;
   height: 45px;
   line-height: 30px;
+  display: flex;
+  align-items: center;
 }
 .action-update {
   color:  rgb(22, 129, 165);
 }
+.action-update:hover, .action-delete:hover {
+  text-decoration: underline;
+}
+
 .action-update:focus, .action-delete:focus {
   outline: none;
 }
 .action-update i, .action-delete i {
-  font-size: 15px;
+  margin-right: 5px;
 }
 /* create-page */
 .container-create {

@@ -31,7 +31,12 @@ function Home(props) {
     }
     getData();
   }, []);
-
+  function deleteData(item) {
+    return fetch("https://filter-reactjs.herokuapp.com/products/" + item, {
+      method: "DELETE",
+    }).then((response) => response.json());
+    
+  }
   function search(rows) {
     return rows.filter(
       (row) => {
@@ -85,7 +90,7 @@ function Home(props) {
             </div>
           </div>
         </div>
-        <DataTable rows={search(data)}></DataTable>
+        <DataTable rows={search(data)} delete={deleteData}></DataTable>
       </div>
     </div>
   );

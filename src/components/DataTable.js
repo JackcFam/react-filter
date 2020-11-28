@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useState} from "react";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -12,7 +12,7 @@ import PropTypes from "prop-types";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
-
+import {Modal, Button} from 'react-bootstrap'
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -122,7 +122,7 @@ const useStyles2 = makeStyles((theme) => ({
   },
 }));
 
-function DataTable({ rows }) {
+function DataTable(props) {
   const classes2 = useStyles2();
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("name");
@@ -130,7 +130,13 @@ function DataTable({ rows }) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = (id) => {
+    setShow(true);
+    console.log(id);
+    props.delete(id);
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -140,7 +146,7 @@ function DataTable({ rows }) {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
+      const newSelecteds = props.rows.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
@@ -180,7 +186,7 @@ function DataTable({ rows }) {
   };
   const isSelected = (name) => selected.indexOf(name) !== -1;
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, props.rows.length - page * rowsPerPage);
   return (
     <div className="table-container">
       <div className={classes2.root}>
@@ -200,10 +206,10 @@ function DataTable({ rows }) {
                 orderBy={orderBy}
                 onSelectAllClick={handleSelectAllClick}
                 onRequestSort={handleRequestSort}
-                rowCount={rows.length}
+                rowCount={props.rows.length}
               />
               <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
+                {stableSort(props.rows, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
                     const isItemSelected = isSelected(row.name);
@@ -237,9 +243,14 @@ function DataTable({ rows }) {
                           >
                             <button className="action-update">
                               <i className="fas fa-pen-square"></i>
+                              <span>Change</span>
                             </button>
-                            <button className="action-delete">
-                              <i className="far fa-trash-alt"></i>
+                            <button
+                              className="action-delete"
+                              onClick={() => handleShow(row.id)}
+                            >
+                              <i className="far fa-trash-alt"></i>{" "}
+                              <span>delete</span>
                             </button>
                           </div>
                         </TableCell>
@@ -257,7 +268,7 @@ function DataTable({ rows }) {
           <TablePagination
             rowsPerPageOptions={[5, 10, 20, 50]}
             component="div"
-            count={rows.length}
+            count={props.rows.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onChangePage={handleChangePage}
@@ -269,6 +280,20 @@ function DataTable({ rows }) {
           label="Dense padding"
         />
       </div>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure to delete?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleClose}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
