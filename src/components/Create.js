@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React from 'react';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
@@ -8,27 +8,6 @@ function Create(props) {
         console.log(data);
         alert("Tạo sản phẩm mới thành công");
     };
-    useEffect(() => {
-        async function postRow(item) {
-          fetch("https://filter-reactjs.herokuapp.com/products", {
-            method: "POST",
-            header: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: item.name,
-              price: item.price,
-              type: item.type,
-              origin: item.origin,
-              status: "flex",
-            }),
-          });
-        }
-        postRow();
-    },[]);
-
-
     return (
       <>
         <div className="container container-create">
@@ -120,7 +99,7 @@ function Create(props) {
           </div>
           <Button className="button-go-back" variant="outline-primary">
             <Link to="/" className="go-back">
-              <i class="fas fa-arrow-left"></i>&nbsp;Go Back
+              <i className="fas fa-arrow-left"></i>&nbsp;Go Back
             </Link>
           </Button>
         </div>
