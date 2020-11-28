@@ -5,7 +5,28 @@ import { useForm } from "react-hook-form";
 function Create(props) {
     const { register, handleSubmit, errors } = useForm();
     const onSubmit = (data) => {
-        console.log(data);
+        const newData = Object.assign(data, { status: "flex" });
+        console.log(newData);
+        fetch("https://filter-reactjs.herokuapp.com/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: newData.name,
+            price: newData.price,
+            type: newData.type,
+            origin: newData.origin,
+            status: newData.status,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
         alert("Tạo sản phẩm mới thành công");
     };
     return (
@@ -40,7 +61,7 @@ function Create(props) {
                 ref={register({
                   required: true,
                   min: 0,
-                  max: 1000000,
+                  max: 1000,
                 })}
               />
               {errors.price && errors.price.type === "required" && (
