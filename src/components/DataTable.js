@@ -1,4 +1,4 @@
-import React,{ useState} from "react";
+import React, { useState } from "react";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -12,7 +12,8 @@ import PropTypes from "prop-types";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
-import {Modal, Button} from 'react-bootstrap'
+import { Modal, Button } from "react-bootstrap";
+import { useForm } from "react-hook-form";
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -82,7 +83,6 @@ function EnhancedTableHead(props) {
     </TableHead>
   );
 }
-
 EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
@@ -122,31 +122,51 @@ const useStyles2 = makeStyles((theme) => ({
   },
 }));
 
-function DataTable(props) {
+function DataTable({ rows, filter_Delete }) {
   const classes2 = useStyles2();
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("name");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [show, setShow] = useState(false);
+  const { register, handleSubmit, errors } = useForm();
   const handleClose = () => setShow(false);
-  const handleShow = (id) => {
-    setShow(true);
-    console.log(id);
-    props.delete(id);
-  };
-
+  const handleShow = () => setShow(true);
+  const [update, setUpdate] = useState([]);
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-
+  const onSubmit = (data) => {
+    console.log(data);
+    fetch("https://filter-reactjs.herokuapp.com/products/" + data.id, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: data.name,
+        price: data.price,
+        type: data.type,
+        origin: data.origin,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    handleClose();
+    alert("Cập nhật sản phẩm thành công");
+  };
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = props.rows.map((n) => n.name);
+      const newSelecteds = rows.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
@@ -186,116 +206,232 @@ function DataTable(props) {
   };
   const isSelected = (name) => selected.indexOf(name) !== -1;
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, props.rows.length - page * rowsPerPage);
-  return (
-    <div className="table-container">
-      <div className={classes2.root}>
-        <Paper className={classes2.paper}>
-          <EnhancedTableToolbar numSelected={selected.length} />
-          <TableContainer>
-            <Table
-              className={classes2.table}
-              aria-labelledby="tableTitle"
-              size={dense ? "small" : "medium"}
-              aria-label="enhanced table"
-            >
-              <EnhancedTableHead
-                classes={classes2}
-                numSelected={selected.length}
-                order={order}
-                orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
-                onRequestSort={handleRequestSort}
-                rowCount={props.rows.length}
-              />
-              <TableBody>
-                {stableSort(props.rows, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
-                    const isItemSelected = isSelected(row.name);
-                    const labelId = `enhanced-table-checkbox-${index}`;
+    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-                    return (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        onClick={(event) => handleClick(event, row.name)}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                      >
-                        <TableCell padding="checkbox"></TableCell>
-                        <TableCell
-                          component="th"
-                          id={labelId}
-                          scope="row"
-                          padding="none"
+  function deleteData(item) {
+    fetch("https://filter-reactjs.herokuapp.com/products/" + item, {
+      method: "DELETE",
+    }).then((response) => response.json());
+    filter_Delete(rows, item);
+    alert("Xóa sản phẩm thành công");
+  }
+  function handleUpdate(idu) {
+    handleShow();
+    fetch("https://filter-reactjs.herokuapp.com/products/" + idu, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUpdate(data);
+      });
+  }
+  return (
+    <>
+      <div className="table-container">
+        <div className={classes2.root}>
+          <Paper className={classes2.paper}>
+            <EnhancedTableToolbar numSelected={selected.length} />
+            <TableContainer>
+              <Table
+                className={classes2.table}
+                aria-labelledby="tableTitle"
+                size={dense ? "small" : "medium"}
+                aria-label="enhanced table"
+              >
+                <EnhancedTableHead
+                  classes={classes2}
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
+                  rowCount={rows.length}
+                />
+                <TableBody>
+                  {stableSort(rows, getComparator(order, orderBy))
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row, index) => {
+                      const isItemSelected = isSelected(row.name);
+                      const labelId = `enhanced-table-checkbox-${index}`;
+
+                      return (
+                        <TableRow
+                          key={row.id}
+                          hover
+                          onClick={(event) => handleClick(event, row.name)}
+                          role="checkbox"
+                          aria-checked={isItemSelected}
+                          tabIndex={-1}
                         >
-                          {row.name}
-                        </TableCell>
-                        <TableCell align="right">{row.price}</TableCell>
-                        <TableCell align="right">{row.type}</TableCell>
-                        <TableCell align="right">{row.origin}</TableCell>
-                        <TableCell align="right">
-                          <div
-                            className="action-table"
-                            style={{ display: `${row.status}` }}
+                          <TableCell padding="checkbox"></TableCell>
+                          <TableCell
+                            component="th"
+                            id={labelId}
+                            scope="row"
+                            padding="none"
                           >
-                            <button className="action-update">
-                              <i className="fas fa-pen-square"></i>
-                              <span>Change</span>
-                            </button>
-                            <button
-                              className="action-delete"
-                              onClick={() => handleShow(row.id)}
+                            {row.name}
+                          </TableCell>
+                          <TableCell align="right">{row.price}</TableCell>
+                          <TableCell align="right">{row.type}</TableCell>
+                          <TableCell align="right">{row.origin}</TableCell>
+                          <TableCell align="right">
+                            <div
+                              className="action-table"
+                              style={{ display: `${row.status}` }}
                             >
-                              <i className="far fa-trash-alt"></i>{" "}
-                              <span>delete</span>
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                {emptyRows > 0 && (
-                  <TableRow style={{ height: (dense ? 20 : 50) * emptyRows }}>
-                    <TableCell colSpan={6} />
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 20, 50]}
-            component="div"
-            count={props.rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
+                              <button
+                                className="action-update"
+                                onClick={() => handleUpdate(row.id)}
+                              >
+                                <i className="fas fa-pen-square"></i>
+                                <span>Change</span>
+                              </button>
+
+                              <button
+                                className="action-delete"
+                                onClick={() => deleteData(row.id)}
+                              >
+                                <i className="far fa-trash-alt"></i>{" "}
+                                <span>delete</span>
+                              </button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: (dense ? 20 : 50) * emptyRows }}>
+                      <TableCell colSpan={6} />
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[10, 20, 50]}
+              component="div"
+              count={rows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+          </Paper>
+          <FormControlLabel
+            control={<Switch checked={dense} onChange={handleChangeDense} />}
+            label="Dense padding"
           />
-        </Paper>
-        <FormControlLabel
-          control={<Switch checked={dense} onChange={handleChangeDense} />}
-          label="Dense padding"
-        />
+        </div>
       </div>
-      <Modal show={show} onHide={handleClose}>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        animation={false}
+        centered
+        size="md"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
+          <Modal.Title class="update">Update Product</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure to delete?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Delete
-          </Button>
-        </Modal.Footer>
+        <Modal.Body>
+          <form className="form-create" onSubmit={handleSubmit(onSubmit)}>
+            <input
+              type="text"
+              style={{ display: "none" }}
+              value={update.id}
+              name="id"
+              ref={register({ required: true })}
+            />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              defaultValue={update.name}
+              placeholder="Name product"
+              aria-invalid={errors.name ? "true" : "false"}
+              ref={register({ required: true, maxLength: 30 })}
+            />
+            {errors.name && errors.name.type === "required" && (
+              <span role="alert" className="errors">
+                This is required
+              </span>
+            )}
+            {errors.name && errors.name.type === "maxLength" && (
+              <span role="alert" className="errors">
+                Max length exceeded
+              </span>
+            )}
+            <input
+              type="text"
+              id="price"
+              defaultValue={update.price}
+              name="price"
+              placeholder="Price"
+              ref={register({
+                required: true,
+                min: 0,
+                max: 1000,
+              })}
+            />
+            {errors.price && errors.price.type === "required" && (
+              <span className="errors">This is required</span>
+            )}
+            {errors.price && errors.price.type === "min" && (
+              <span className="errors">
+                Price should not be less than 0 and greater than 1000
+              </span>
+            )}
+            {errors.price && errors.price.type === "max" && (
+              <span className="errors">
+                Price should not be less than 0 and greater than 1000
+              </span>
+            )}
+            <div className="filter-create">
+              <div className="type-create">
+                <label for="type">Type</label>
+                <select
+                  id="type"
+                  name="type"
+                  defaultValue={update.type}
+                  ref={register({
+                    required: true,
+                  })}
+                >
+                  <option value="different">Other</option>
+                  <option value="computer">Computer</option>
+                  <option value="car">Car</option>
+                  <option value="moto">Motorbike</option>
+                  <option value="phone">Phone</option>
+                  <option value="washing">Washing</option>
+                </select>
+              </div>
+              <div className="origin-create">
+                <label for="origin">Origin</label>
+                <select
+                  id="origin"
+                  name="origin"
+                  defaultValue={update.origin}
+                  ref={register({
+                    required: true,
+                  })}
+                >
+                  <option value="DIFF">Other</option>
+                  <option value="US">USA</option>
+                  <option value="JP">Japan</option>
+                  <option value="VN">VietNam</option>
+                  <option value="EU">Europe</option>
+                  <option value="KO">Korea</option>
+                </select>
+              </div>
+            </div>
+            <Button className="col-12 btn-success" type="submit">
+              Update
+            </Button>
+          </form>
+        </Modal.Body>
       </Modal>
-    </div>
+    </>
   );
 }
-
 export default DataTable;

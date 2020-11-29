@@ -2,32 +2,33 @@ import React from 'react';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
+
 function Create(props) {
-    const { register, handleSubmit, errors } = useForm();
-    const onSubmit = (data) => {
-        const newData = Object.assign(data, { status: "flex" });
-        console.log(newData);
-        fetch("https://filter-reactjs.herokuapp.com/products", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: newData.name,
-            price: newData.price,
-            type: newData.type,
-            origin: newData.origin,
-            status: newData.status,
-          }),
+  const { register, handleSubmit, errors } = useForm();
+    const onSubmit = (data, e) => {
+      const newData = Object.assign(data, { status: "flex" });
+      fetch("https://filter-reactjs.herokuapp.com/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newData.name,
+          price: newData.price,
+          type: newData.type,
+          origin: newData.origin,
+          status: newData.status,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Success:");
         })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Success:");
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-        alert("Tạo sản phẩm mới thành công");
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+      e.target.reset();
+      alert("Tạo sản phẩm mới thành công");
     };
     return (
       <>
@@ -61,7 +62,7 @@ function Create(props) {
                 ref={register({
                   required: true,
                   min: 0,
-                  max: 1000,
+                  max: 10000,
                 })}
               />
               {errors.price && errors.price.type === "required" && (
@@ -69,12 +70,12 @@ function Create(props) {
               )}
               {errors.price && errors.price.type === "min" && (
                 <span className="errors">
-                  Price should not be less than 0 and greater than 1000
+                  Price should not be less than 0 and greater than 10000
                 </span>
               )}
               {errors.price && errors.price.type === "max" && (
                 <span className="errors">
-                  Price should not be less than 0 and greater than 1000
+                  Price should not be less than 0 and greater than 10000
                 </span>
               )}
               <div className="filter-create">

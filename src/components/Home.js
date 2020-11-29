@@ -15,7 +15,7 @@ function valuetext(value) {
 }
 function Home(props) {
   const classes = useStyles();
-  const [value, setValue] = useState([0, 1000]);
+  const [value, setValue] = useState([0, 3000]);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -31,12 +31,19 @@ function Home(props) {
     }
     getData();
   }, []);
-  function deleteData(item) {
-    return fetch("https://filter-reactjs.herokuapp.com/products/" + item, {
-      method: "DELETE",
-    }).then((response) => response.json());
-    
+  function filterDelete(delete1, id) {
+  let newArray = delete1.filter(item => item.id !== id);
+    setData(newArray);
   }
+  // function updateData(id) {
+  //   fetch("https://filter-reactjs.herokuapp.com/products/" + id, {
+  //     method: "GET",
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setUpdate(data);
+  //     });
+  // }
   function search(rows) {
     return rows.filter(
       (row) => {
@@ -80,8 +87,8 @@ function Home(props) {
               <Slider
                 value={value}
                 min={0}
-                max={1000}
-                step={1}
+                max={10000}
+                step={1.5}
                 onChange={handleChange}
                 valueLabelDisplay="auto"
                 aria-labelledby="range-slider"
@@ -90,7 +97,7 @@ function Home(props) {
             </div>
           </div>
         </div>
-        <DataTable rows={search(data)} delete={deleteData}></DataTable>
+        <DataTable rows={search(data)} filter_Delete= {filterDelete}></DataTable>
       </div>
     </div>
   );
