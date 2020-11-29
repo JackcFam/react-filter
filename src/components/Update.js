@@ -36,7 +36,6 @@ function Update(props) {
       const response = await fetch("https://filter-reactjs.herokuapp.com/products?slug=" + slug);
       const updated = await response.json();
       setProductUpdate(updated);
-      console.log(updateProduct);
     }
     getProductUpdate();
   }, []);

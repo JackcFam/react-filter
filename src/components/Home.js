@@ -20,7 +20,7 @@ function Home(props) {
     setValue(newValue);
   };
   const [data, setData] = useState([]);
-  const [searchData, setSearchData] = useState('');
+  const [searchData, setSearchData] = useState("");
   useEffect(() => {
     async function getData() {
       const request = await fetch(
@@ -31,35 +31,34 @@ function Home(props) {
     }
     getData();
   }, []);
+
+
   function filterDelete(delete1, id) {
-  let newArray = delete1.filter(item => item.id !== id);
+    let newArray = delete1.filter((item) => item.id !== id);
     setData(newArray);
   }
-  // function updateData(id) {
-  //   fetch("https://filter-reactjs.herokuapp.com/products/" + id, {
-  //     method: "GET",
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       setUpdate(data);
-  //     });
-  // }
+
   function search(rows) {
-    return rows.filter(
-      (row) => {
-        if (searchData==='') {
-          return row.price >= value[0] && row.price <= value[1];
-        } else {
-          return (
-            row.name.toLowerCase().indexOf(searchData.toLowerCase()) > -1 ||
-            row.type.toLowerCase().indexOf(searchData.toLowerCase()) > -1 ||
-            (row.origin.toLowerCase().indexOf(searchData.toLowerCase()) > -1 &&
-              row.price >= value[0] &&
-              row.price <= value[1])
-          );
-        }
+    return rows && rows.filter((row) => {
+      if (searchData === "") {
+        return row.price >= value[0] && row.price <= value[1];
+      } else {
+        return (
+          row.name.toLowerCase().indexOf(searchData.toLowerCase()) > -1 ||
+          row.type.toLowerCase().indexOf(searchData.toLowerCase()) > -1 ||
+          (row.origin.toLowerCase().indexOf(searchData.toLowerCase()) > -1 &&
+            row.price >= value[0] &&
+            row.price <= value[1])
+        );
       }
-    );
+    });
+  }
+  function update123(items) {
+    let newItems = items;
+    let newSumData = [...data];
+    let index = newSumData.findIndex((obj) => obj.id === newItems.id);
+    newSumData[index] = newItems; // thay đổi dataItems trong mảng
+    setData(newSumData);
   }
   return (
     <div className="main-content">
@@ -97,7 +96,11 @@ function Home(props) {
             </div>
           </div>
         </div>
-        <DataTable rows={search(data)} filter_Delete= {filterDelete}></DataTable>
+        <DataTable
+          rows={search(data)}
+          filter_Delete={filterDelete}
+          updateHome={update123}
+        ></DataTable>
       </div>
     </div>
   );

@@ -122,7 +122,7 @@ const useStyles2 = makeStyles((theme) => ({
   },
 }));
 
-function DataTable({ rows, filter_Delete }) {
+function DataTable({ rows, filter_Delete, updateHome }) {
   const classes2 = useStyles2();
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("name");
@@ -141,7 +141,6 @@ function DataTable({ rows, filter_Delete }) {
     setOrderBy(property);
   };
   const onSubmit = (data) => {
-    console.log(data);
     fetch("https://filter-reactjs.herokuapp.com/products/" + data.id, {
       method: "PATCH",
       headers: {
@@ -156,13 +155,15 @@ function DataTable({ rows, filter_Delete }) {
     })
       .then((response) => response.json())
       .then((data) => {
+        alert("Cập nhật sản phẩm thành công");
+        updateHome(data);
         console.log("Success:");
+        handleClose();
       })
       .catch((error) => {
+        handleClose();
         console.error("Error:", error);
       });
-    handleClose();
-    alert("Cập nhật sản phẩm thành công");
   };
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -215,7 +216,7 @@ function DataTable({ rows, filter_Delete }) {
     filter_Delete(rows, item);
     alert("Xóa sản phẩm thành công");
   }
-  function handleUpdate(idu) {
+  function handleShowUpdate(idu) {
     handleShow();
     fetch("https://filter-reactjs.herokuapp.com/products/" + idu, {
       method: "GET",
@@ -282,7 +283,7 @@ function DataTable({ rows, filter_Delete }) {
                             >
                               <button
                                 className="action-update"
-                                onClick={() => handleUpdate(row.id)}
+                                onClick={() => handleShowUpdate(row.id)}
                               >
                                 <i className="fas fa-pen-square"></i>
                                 <span>Change</span>
