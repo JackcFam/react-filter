@@ -160,3 +160,21 @@
   font-size: 35px;
   text-align: center;
 }
+@media (max-width: 480px) {
+  .filter-search {
+    flex-flow: row wrap;
+    margin-top: 10px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .left, .right {
+    min-width: 100%;
+  }
+  .makeStyles-root-1
+  {
+    margin-top: 10px;
+  }
+  .MuiSlider-root.MuiSlider-colorPrimary {
+    width: 100% !important;
+  }
+}

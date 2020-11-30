@@ -15,7 +15,7 @@ function valuetext(value) {
 }
 function Home(props) {
   const classes = useStyles();
-  const [value, setValue] = useState([0, 3000]);
+  const [value, setValue] = useState([0, 10000]);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
